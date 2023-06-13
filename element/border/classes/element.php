@@ -58,12 +58,11 @@ class element extends \mod_customcert\element {
      * @param \stdClass $user the user we are rendering this for
      */
     public function render($pdf, $preview, $user) {
-        $colour = \TCPDF_COLORS::convertHTMLColorToDec($this->get_colour(), $colour);
         $pdf->SetLineStyle(array('width' => $this->get_data(), 'color' => $colour));
-        $pdf->Line(0, 0, $pdf->getPageWidth(), 0);
-        $pdf->Line($pdf->getPageWidth(), 0, $pdf->getPageWidth(), $pdf->getPageHeight());
-        $pdf->Line(0, $pdf->getPageHeight(), $pdf->getPageWidth(), $pdf->getPageHeight());
-        $pdf->Line(0, 0, 0, $pdf->getPageHeight());
+        $pdf->Line(0, 0, $pdf->w, 0);
+        $pdf->Line($pdf->w, 0, $pdf->w, $pdf->h);
+        $pdf->Line(0, $pdf->h, $pdf->w, $pdf->h);
+        $pdf->Line(0, 0, 0, $pdf->h);
     }
 
     /**

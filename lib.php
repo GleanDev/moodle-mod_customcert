@@ -339,9 +339,9 @@ function customcert_extend_settings_navigation(settings_navigation $settings, na
         $beforekey = $keys[$i + 1];
     }
 
-    if (has_capability('mod/customcert:manage', $settings->get_page()->cm->context)) {
+    if (has_capability('mod/customcert:manage', $PAGE->cm->context)) {
         // Get the template id.
-        $templateid = $DB->get_field('customcert', 'templateid', array('id' => $settings->get_page()->cm->instance));
+        $templateid = $DB->get_field('customcert', 'templateid', array('id' => $PAGE->cm->instance));
         $node = navigation_node::create(get_string('editcustomcert', 'customcert'),
                 new moodle_url('/mod/customcert/edit.php', array('tid' => $templateid)),
                 navigation_node::TYPE_SETTING, null, 'mod_customcert_edit',
@@ -349,9 +349,9 @@ function customcert_extend_settings_navigation(settings_navigation $settings, na
         $customcertnode->add_node($node, $beforekey);
     }
 
-    if (has_capability('mod/customcert:verifycertificate', $settings->get_page()->cm->context)) {
+    if (has_capability('mod/customcert:verifycertificate', $PAGE->cm->context)) {
         $node = navigation_node::create(get_string('verifycertificate', 'customcert'),
-            new moodle_url('/mod/customcert/verify_certificate.php', array('contextid' => $settings->get_page()->cm->context->id)),
+            new moodle_url('/mod/customcert/verify_certificate.php', array('contextid' => $PAGE->cm->context->id)),
             navigation_node::TYPE_SETTING, null, 'mod_customcert_verify_certificate',
             new pix_icon('t/check', ''));
         $customcertnode->add_node($node, $beforekey);
@@ -428,28 +428,4 @@ function mod_customcert_get_fontawesome_icon_map() {
     return [
         'mod_customcert:download' => 'fa-download'
     ];
-}
-
-/**
- * Force custom language for current session.
- * @param $language
- * @return bool
- */
-function mod_customcert_force_current_language($language): bool {
-    global $USER;
-
-    $forced = false;
-    if (empty($language)) {
-        return $forced;
-    }
-
-    $activelangs = get_string_manager()->get_list_of_translations();
-    $userlang = $USER->lang ?? current_language();
-
-    if (array_key_exists($language, $activelangs) && $language != $userlang) {
-        force_current_language($language);
-        $forced = true;
-    }
-
-    return $forced;
 }
