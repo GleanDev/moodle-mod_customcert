@@ -65,7 +65,7 @@ class element_helper {
      */
     public static function render_content($pdf, $element, $content) {
         $x = $element->get_posx();
-        $y = $element->get_posy();
+        $y = $element->get_posy() + 0.5;
         $w = $element->get_width();
         $refpoint = $element->get_refpoint();
         $actualwidth = $pdf->GetStringWidth($content);
@@ -95,12 +95,8 @@ class element_helper {
                 }
                 break;
         }
-                
                 if ($w) {
                     $w += 100;
-                }
-                if ($x) {
-                    $x -= 15;
                 }
         list($font, $attr) = self::get_font($element);
         $fontstyle = 'font-family: ' . $font;
