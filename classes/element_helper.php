@@ -23,7 +23,7 @@
  */
 
 namespace mod_customcert;
-
+use TCPDF;
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->libdir . '/grade/constants.php');
@@ -64,22 +64,17 @@ class element_helper {
      * @param string $content the content to render
      */
     public static function render_content($pdf, $element, $content) {
-        list($font, $attr) = self::get_font($element);
-        $pdf->setFont($font, $attr, $element->get_fontsize());
-        $fontcolour = \TCPDF_COLORS::convertHTMLColorToDec($element->get_colour(), $fontcolour);
-        $pdf->SetTextColor($fontcolour['R'], $fontcolour['G'], $fontcolour['B']);
-
         $x = $element->get_posx();
-        $y = $element->get_posy();
+        $y = $element->get_posy() + 0.5;
         $w = $element->get_width();
         $refpoint = $element->get_refpoint();
         $actualwidth = $pdf->GetStringWidth($content);
         $alignment = $element->get_alignment();
-
+        
         if ($w and $w < $actualwidth) {
             $actualwidth = $w;
         }
-
+        
         switch ($refpoint) {
             case self::CUSTOMCERT_REF_POINT_TOPRIGHT:
                 $x = $element->get_posx() - $actualwidth;
@@ -100,13 +95,22 @@ class element_helper {
                 }
                 break;
         }
-
-        if ($w) {
-            $w += 0.0001;
+                if ($w) {
+                    $w += 100;
+                }
+        list($font, $attr) = self::get_font($element);
+        $fontstyle = 'font-family: ' . $font;
+        if (strpos($attr, 'B') !== false) {
+            $fontstyle .= '; font-weight: bold';
         }
-        $pdf->setCellPaddings(0, 0, 0, 0);
-        $pdf->writeHTMLCell($w, 0, $x, $y, $content, 0, 0, false, true, $alignment);
-    }
+        if (strpos($attr, 'I') !== false) {
+            $fontstyle .= '; font-style: italic';
+        }
+        $style = '; color: ' . $element->get_colour() . '; font-size: ' . $element->get_fontsize() . 'pt;';
+        $containerStyle = 'position: absolute; left: ' . $x . 'mm; top: ' . $y . 'mm; width: ' . $w . 'mm;';
+        $container = '<div style="' . $containerStyle . $fontstyle . $style . '">' . $content . '</div>';
+        $pdf->WriteHTML($container);
+    }    
 
     /**
      * Common behaviour for rendering specified content on the drag and drop page.

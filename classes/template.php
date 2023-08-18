@@ -24,6 +24,8 @@
 
 namespace mod_customcert;
 
+require_once($CFG->dirroot . '/mod/customcert/vendor/autoload.php');
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -262,24 +264,15 @@ class template {
             $user = \core_user::get_user($userid);
         }
 
-        require_once($CFG->libdir . '/pdflib.php');
-        require_once($CFG->dirroot . '/mod/customcert/lib.php');
-
         // Get the pages for the template, there should always be at least one page for each template.
         if ($pages = $DB->get_records('customcert_pages', array('templateid' => $this->id), 'sequence ASC')) {
             // Create the pdf object.
-            $pdf = new \pdf();
+            $pdf = new \Mpdf\Mpdf();
+
+            $pdf->autoLangToFont = true; // Enable automatic language to font mapping
+            $pdf->autoScriptToLang = true; // Enable automatic script to language mapping
 
             $customcert = $DB->get_record('customcert', ['templateid' => $this->id]);
-
-            // I want to have my digital diplomas without having to change my preferred language.
-            $userlang = $USER->lang ?? current_language();
-            $forcelang = mod_customcert_force_current_language($customcert->language);
-            if (!empty($forcelang)) {
-                // This is a failsafe -- if an exception triggers during the template rendering, this should still execute.
-                // Preventing a user from getting trapped with the wrong language.
-                \core_shutdown_manager::register_function('force_current_language', [$userlang]);
-            }
 
             // If the template belongs to a certificate then we need to check what permissions we set for it.
             if (!empty($customcert->protection)) {
@@ -296,10 +289,11 @@ class template {
             // Remove full-stop at the end, if it exists, to avoid "..pdf" being created and being filtered by clean_filename.
             $filename = rtrim(format_string($this->name, true, ['context' => $this->get_context()]), '.');
 
-            $pdf->setPrintHeader(false);
-            $pdf->setPrintFooter(false);
             $pdf->SetTitle($filename);
-            $pdf->SetAutoPageBreak(true, 0);
+            $pdf->SetHTMLHeader('');
+            $pdf->SetHTMLFooter('');
+            $pdf->SetAutoPageBreak(true, '0');
+
 
             // This is the logic the TCPDF library uses when processing the name. This makes names
             // such as 'الشهادة' become empty, so set a default name in these cases.
@@ -319,8 +313,11 @@ class template {
                 } else {
                     $orientation = 'P';
                 }
-                $pdf->AddPage($orientation, array($page->width, $page->height));
-                $pdf->SetMargins($page->leftmargin, 0, $page->rightmargin);
+                $pdf->AddPageByArray([
+                    'orientation' => $orientation,
+                    'size' => [$page->width, $page->height]
+                ]);
+                $pdf->SetMargins(0, 0, 0);
                 // Get the elements for the page.
                 if ($elements = $DB->get_records('customcert_elements', array('pageid' => $page->id), 'sequence ASC')) {
                     // Loop through and display.
@@ -331,11 +328,6 @@ class template {
                         }
                     }
                 }
-            }
-
-            // We restore original language.
-            if ($userlang != $customcert->language) {
-                mod_customcert_force_current_language($userlang);
             }
 
             if ($return) {

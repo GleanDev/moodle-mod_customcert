@@ -365,7 +365,15 @@ class element extends \mod_customcert\element {
             'strftimemonthyear',
             'strftimerecent',
             'strftimerecentfull',
-            'strftimetime'
+            'strftimetime',
+
+            // Add new date format options here
+            'strfTimeDayOnlyEN',   // Display day only in english
+            'strfTimeMonthOnlyEN', // Display month only in english
+            'strfTimeYearOnlyEN',  // Display year only in english
+            'strfTimeDayOnlyKM',   // Display day only in khmer
+            'strfTimeMonthOnlyKM', // Display month only in khmer
+            'strfTimedYearOnlyKM'  // Display year only in khmer
         ];
 
         foreach ($strdateformats as $strdateformat) {
@@ -373,6 +381,18 @@ class element extends \mod_customcert\element {
                 $dateformats[$strdateformat] = userdate($date, get_string('strftimedatefullshort', 'langconfig'), 99, false);
             } else if ($strdateformat == 'strftimedatetimeshortwleadingzero') {
                 $dateformats[$strdateformat] = userdate($date, get_string('strftimedatetimeshort', 'langconfig'), 99, false);
+            } else if ($strdateformat == 'strfTimeDayOnlyEN') {
+                $dateformats[$strdateformat] = 'Day In English';
+            } else if ($strdateformat == 'strfTimeMonthOnlyEN') {
+                $dateformats[$strdateformat] = 'Month In English';
+            } else if ($strdateformat == 'strfTimeYearOnlyEN') {
+                $dateformats[$strdateformat] = 'Year In English';
+            } else if ($strdateformat == 'strfTimeDayOnlyKM') {
+                $dateformats[$strdateformat] = 'Day In Khmer';
+            } else if ($strdateformat == 'strfTimeMonthOnlyKM') {
+                $dateformats[$strdateformat] = 'Month In Khmer';
+            } else if ($strdateformat == 'strfTimedYearOnlyKM') {
+                $dateformats[$strdateformat] = 'Year In Khmer';
             } else {
                 $dateformats[$strdateformat] = userdate($date, get_string($strdateformat, 'langconfig'));
             }
@@ -412,7 +432,71 @@ class element extends \mod_customcert\element {
 
         // Ok, so we must have been passed the actual format in the lang file.
         if (!isset($certificatedate)) {
-            if ($dateformat == 'strftimedatefullshortwleadingzero') {
+            $khmerMonthNames = array(
+                1 => 'មករា',
+                2 => 'កុម្ភៈ',
+                3 => 'មិនា',
+                4 => 'មេសា',
+                5 => 'ឧសភា',
+                6 => 'មិថុនា',
+                7 => 'កក្កដា',
+                8 => 'សីហា',
+                9 => 'កញ្ញា',
+                10 => 'តុលា',
+                11 => 'វិច្ឆិកា',
+                12 => 'ធ្នូ'
+            );
+            $khmerNumbers = array(
+                0 => '០',
+                1 => '១',
+                2 => '២',
+                3 => '៣',
+                4 => '៤',
+                5 => '៥',
+                6 => '៦',
+                7 => '៧',
+                8 => '៨',
+                9 => '៩'
+            );
+            $englishMonthNames = array(
+                1 => 'January',
+                2 => 'February',
+                3 => 'March',
+                4 => 'April',
+                5 => 'May',
+                6 => 'June',
+                7 => 'July',
+                8 => 'August',
+                9 => 'September',
+                10 => 'October',
+                11 => 'November',
+                12 => 'December'
+            );
+            if ($dateformat === 'strfTimeDayOnlyEN') {
+                $certificatedate = userdate($date, '%d');
+            } else if ($dateformat === 'strfTimeMonthOnlyEN') {
+                $monthNumber = intval(userdate($date, '%m'));
+                $certificatedate = $englishMonthNames[$monthNumber];
+            } else if ($dateformat === 'strfTimeYearOnlyEN') {
+                $certificatedate = userdate($date, '%Y');
+            } else if ($dateformat === 'strfTimeDayOnlyKM') {
+                $day = intval(userdate($date, '%d'));
+                $khmerDay = '';
+                foreach (str_split($day) as $digit) {
+                    $khmerDay .= $khmerNumbers[intval($digit)];
+                }
+                $certificatedate = $khmerDay;
+            } else if ($dateformat === 'strfTimeMonthOnlyKM') {
+                $monthNumber = intval(userdate($date, '%m'));
+                $certificatedate = $khmerMonthNames[$monthNumber];
+            } else if ($dateformat === 'strfTimedYearOnlyKM') {
+                $year = intval(userdate($date, '%Y'));
+                $khmerYear = '';
+                foreach (str_split($year) as $digit) {
+                    $khmerYear .= $khmerNumbers[intval($digit)];
+                }
+                $certificatedate = $khmerYear;
+            } else if ($dateformat == 'strftimedatefullshortwleadingzero') {
                 $certificatedate = userdate($date, get_string('strftimedatefullshort', 'langconfig'), 99, false);
             } else if ($dateformat == 'strftimedatetimeshortwleadingzero') {
                 $certificatedate = userdate($date, get_string('strftimedatetimeshort', 'langconfig'), 99, false);

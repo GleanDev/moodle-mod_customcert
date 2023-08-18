@@ -85,9 +85,9 @@ class element extends \customcertelement_image\element {
             // Set the image to the size of the PDF page.
             $mimetype = $file->get_mimetype();
             if ($mimetype == 'image/svg+xml') {
-                $pdf->ImageSVG($location, 0, 0, $pdf->getPageWidth(), $pdf->getPageHeight());
+                $pdf->ImageSVG($location, 0, 0, $pdf->w, $pdf->h);
             } else {
-                $pdf->Image($location, 0, 0, $pdf->getPageWidth(), $pdf->getPageHeight());
+                $pdf->WriteHTML('<div style="background-image: url('.$location.'); background-repeat: no-repeat; background-size: cover; width: 100%; height: 100%; position: absolute; top: 0; left: 0;"></div>');
             }
         }
     }
